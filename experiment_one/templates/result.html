@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+ <div class="panel panel-primary" style="width: 50%;margin: auto">
+        <div class="panel-heading">抽奖结果</div>
+        <div class="panel-body">
+            {% if not first_prizes == []%}
+            <h2>一等奖</h2>
+            <ul class="list-group">
+                {% for item in first_prizes %}
+                <li class="list-group-item">{{escape(item)}}</li>
+                {% end %}
+            </ul>
+            {% end %}
+            {% if not second_prizes == []%}
+
+            <h2>二等奖</h2>
+            <ul class="list-group">
+                {% for item in second_prizes %}
+                <li class="list-group-item">{{escape(item)}}</li>
+                {% end %}
+            </ul>
+                {% end %}
+
+            {% if not third_prizes == []%}
+
+            <h2>三等奖</h2>
+            <ul class="list-group">
+                {% for item in third_prizes %}
+                <li class="list-group-item">{{escape(item)}}</li>
+                {% end %}
+            </ul>
+                            {% end %}
+
+        </div>
+    </div>
+</body>
+</html>

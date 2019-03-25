@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>抽奖系统</title>
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        body{
+            background-image: url("../static/images/sky1.jpg");
+        }
+        h1{
+            font-family:"Times New Roman", Times, serif;
+            color: #000000;
+            text-align: center;
+        }
+        label{
+            color: azure;
+        }
+    </style>
+</head>
+<body>
+<h1>抽奖系统</h1>
+<br>
+<br>
+<form class="form-horizontal" method="post">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">一等奖</label>
+        <div class="input-group">
+            <span class="input-group-addon glyphicon glyphicon-flag" id="basic-addon1"></span>
+            <input type="text" class="form-control" placeholder="请设置一等奖个数" name="first"
+                   style="width: 30%" aria-describedby="basic-addon1">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">二等奖</label>
+        <div class="input-group">
+            <span class="input-group-addon glyphicon glyphicon-flag" id="basic-addon2"></span>
+            <input type="text" class="form-control" placeholder="请设置二等奖个数" name="second"
+                   style="width: 30%" aria-describedby="basic-addon2">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">三等奖</label>
+        <div class="input-group">
+            <span class="input-group-addon glyphicon glyphicon-flag" id="basic-addon3"></span>
+            <input type="text" class="form-control" placeholder="请设置三等奖个数" name="third"
+                   style="width: 30%" aria-describedby="basic-addon3">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">参赛人员</label>
+        <input type="text" class="form-control" placeholder="请输入参与人员,以','分隔" name="join_people" style="width: 50%;">
+    </div>
+
+    <div style="text-align: center">
+        <button type="submit" class="btn btn-success"  >提交数据</button>
+    </div>
+</form>
+<br>
+    <div style="text-align: center">
+        <!--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-->
+
+      <button type="button" class="btn btn-primary" id="f">抽一等奖</button>&nbsp;
+      <button type="button" class="btn btn-primary" id="s">抽二等奖</button>&nbsp;
+      <button type="button" class="btn btn-primary" id="t">抽三等奖</button>
+    </div>
+<br>
+    <div style="text-align: center">
+        <button type="button" class="btn btn-danger">重置</button>
+    </div>
+<br>
+<br>
+<div class="show" style="text-align: center">
+
+</div>
+
+<script>
+
+    $(document).ready(function(){
+	    $("button").click(function(){
+	        const text = $(this).text();
+		    $.get("http://localhost:8888/ajax/".concat(decodeURIComponent(text)),function(data,status){
+		        $(".show").empty().append(data);
+		    });
+	});
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>聊天窗口</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/mui.min.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/mui.imageviewer.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/chat-im.css">
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+</head>
+
+<body>
+<!-- 聊天内容列表 -->
+<div class="im-chat-main" >
+    <ul id="msg_list" >
+        {% for statement in statements %}
+            {% if statement[0] == username %}
+            <li class="im-chat-mine">
+                <div class="im-chat-user">
+                    <cite>{{statement[0]}}<i>{{statement[1]}}</i></cite>
+                </div>
+                <div class="im-chat-text">{{statement[2]}}</div>
+            </li>
+            {% end %}
+            {% if statement[0] != username %}
+
+            <li>
+                <div class="im-chat-user">
+                    <cite>{{ statement[0] }}<i>{{ statement[1] }}</i></cite>
+                </div>
+                <div class="im-chat-text">{{ statement[2] }}</div>
+            </li>
+            {% end %}
+
+        {% end %}
+
+
+    </ul>
+
+</div>
+<!-- 底部 -->
+<footer>
+    <div class="input-group">
+        <label for="msgInput" class="user_name" id={{username}}></label>
+        <input type="text" class="form-control" placeholder="请输入你要发送的内容..." id="msgInput">
+        <span class="input-group-btn">
+        <button class="btn mui-btn-success" type="button" id="msgSend">发送</button>
+      </span>
+    </div>
+</footer>
+
+
+</body>
+<script src="../static/js/mui.js"></script>
+<script src="../static/js/mui.imageViewer.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        const user_name = $('.user_name').attr('id');
+        const input = $('#msgInput');
+        const ws = new WebSocket("ws://localhost:8888/ws");
+        const msgShow = $('#msg_list');
+        $('#msgSend').click(function () {
+            var msg = input.val();
+            input.val('');
+            ws.send(msg);
+
+        });
+        ws.onmessage = function (evt) {
+            // window.location.href = "http://localhost:8888/chat/".concat(chat_name);
+            var data = JSON.parse(evt.data);
+            const name = data.user_name ;
+            var addHtml = "";
+            if (user_name === name){
+                addHtml = "<li class=\"im-chat-mine\">\n" +
+                    "                <div class=\"im-chat-user\">\n" +
+                    "                    <cite>"+data.user_name+"<i>"+data.time+"</i></cite>\n" +
+                    "                </div>\n" +
+                    "                <div class=\"im-chat-text\">"+data.message+"</div>\n" +
+                    "            </li>"
+            }else{
+                addHtml = "                <div class=\"im-chat-user\">\n" +
+                    "                    <cite>"+data.user_name+"<i>"+data.time+"</i></cite>\n" +
+                    "                </div>\n" +
+                    "                <div class=\"im-chat-text\">"+data.message+"</div>\n"
+            }
+            msgShow.append(addHtml)
+        }
+    });
+
+</script>
+</html>
