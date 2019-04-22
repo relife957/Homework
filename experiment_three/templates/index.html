@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>canvas</title>
+        <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        body{ background:black;}
+        #myCanvas{ background:white;}
+        span{ color:white;}
+    </style>
+</head>
+
+<body>
+
+<form id="form1">
+    <div align="center" class="i-canvas">
+        <canvas id="myCanvas" width="500" height="300"></canvas>
+            <button onclick="DrawPic();return false;">开始画图</button>
+            <button id="subServer">上传到服务器</button>
+    </div>
+</form>
+</body>
+
+
+<script>
+
+
+    var oC = document.getElementById('myCanvas');
+
+    var oGC = oC.getContext('2d');
+function DrawPic() {
+
+
+	oC.onmousedown = function(ev){
+
+		var ev = ev || window.event;
+		oGC.moveTo(ev.clientX-oC.offsetLeft,ev.clientY-oC.offsetTop);
+		document.onmousemove = function(ev){
+			var ev = ev || window.event;
+			oGC.lineTo(ev.clientX-oC.offsetLeft,ev.clientY-oC.offsetTop);
+			oGC.stroke();
+		};
+		document.onmouseup = function(){
+			document.onmousemove = null;
+			document.onmouseup = null;
+		};
+	};
+
+}
+
+    // var img = new Image();
+    // var getPathval = null ;
+$(document).ready(function () {
+    $('#subServer').click(function () {
+        var Pic = document.getElementById("myCanvas").toDataURL("image/png");
+        // if(getPathval == null){
+        //     oGC.fillStyle='#fff';
+        //     oGC.fillRect(0,0,500,300)
+        // }else{
+        //     img.src = getPathval;
+		// 	oGC.drawImage(img,0,0,500,300);
+        // }
+        // img.src = Pic;
+        // oGC.drawImage(img,0,0,500,300);
+        // Pic = oC.toDataURL("image/png");
+        Pic = Pic.replace(/^data:image\/(png|jpg);base64,/, "");
+        $.post("http://localhost:8888",
+            {imageData:Pic},
+            function (data,status) {
+                alert("submit successful!")
+            });
+    });
+
+});
+
+</script>
+
+</html>
