@@ -5,7 +5,7 @@
 
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;" name="viewport"/>
 
-    <title>js canvas画板pc端移动端-jq22.com</title>
+    <title>canvas画板</title>
     <script src="https://libs.baidu.com/jquery/1.11.3/jquery.min.js"></script>
     <style>
         body, html {
@@ -21,14 +21,6 @@
             box-sizing: border-box;
         }
 
-        .clearfix:before, .clearfix:after {
-            content: " ";
-            display: table;
-        }
-
-        .clearfix:after {
-            clear: both;
-        }
 
         body {
             background: #494A5F;
@@ -59,10 +51,6 @@
             color: #fff;
         }
 
-        .center {
-            text-align: center;
-        }
-
         h5 {
             width: 100%;
             padding: 0;
@@ -81,12 +69,6 @@
             -webkit-box-shadow: 2px 2px 5px 0px rgba(50, 50, 50, 0.75);
             -moz-box-shadow: 2px 2px 5px 0px rgba(50, 50, 50, 0.75);
             box-shadow: 2px 2px 5px 0px rgba(50, 50, 50, 0.75);
-        }
-
-        .color-line {
-            text-align: center;
-            height: 50px;
-            line-height: 50px;
         }
 
         .color-line input {
@@ -108,19 +90,13 @@
                 </canvas>
             </canvas>
         </div>
-        <div class="color-line">
-            <span>颜色:</span>
-            <input id="color-picker" type="color">
-            <span>画笔大小:</span>
-            <input id="size-picker" type="range" min="1" max="50">
-        </div>
     </section>
     <button class="subServer">上传图片到服务器</button>
 </div>
 
 <script>
     $(document).ready(function () {
-        const ws = new WebSocket("ws://10.40.46.22:8888/ws");
+        const ws = new WebSocket("ws://localhost:8888/ws");
         $('.subServer').click(function () {
             var Pic = document.getElementById("sketchpad").toDataURL("image/png");
 
@@ -144,25 +120,13 @@
             width: 320,
             height: 500,
         });
-        $('#color-picker').change(color);//颜色
-        $('#color-picker').val('#000');//颜色默认黑色
-        $('#size-picker').change(size);//大小
-        $('#size-picker').val(1);//大小默认1
+        sketchpad.color = '#000';
+        sketchpad.penSize = 15;
     });
 
-    // 颜色
-    function color(event) {
-        sketchpad.color = $(event.target).val();
-    }
-
-    // 大小
-    function size(event) {
-        sketchpad.penSize = $(event.target).val();
-    }
 </script>
 
 <script>
-    // zhangyibo
     // sketchpad.redraw(sketchpad.strokes); // 监听数组变化绘图方法
     // this.reset();绘图方法
     function Sketchpad(config) {
@@ -170,10 +134,6 @@
             this[key] = this[key].bind(this);
         }
 
-        if (!config.hasOwnProperty('element')) {
-            console.error('SKETCHPAD ERROR: No element selected');
-            return;
-        }
 
         if (typeof(config.element) === 'string') {
             this.element = $(config.element);
@@ -185,10 +145,9 @@
         this._width = config.width || this.element.attr('data-width') || 0;
         // 高度
         this._height = config.height || this.element.attr('data-height') || 0;
-        // 颜色
-        this.color = config.color || this.element.attr('data-color') || '#000000';
-        // 大小
-        this.penSize = config.penSize || this.element.attr('data-penSize') || 5;
+
+        this.penSize = 15 ;
+        this.color = '#000';
         // 数组坐标点
         this.strokes = config.strokes || [];
         this._currentStroke = {
@@ -215,12 +174,12 @@
         Array.prototype.push = function (v) {
             this._push(v);
             if (typeof this.pushListener == 'function') this.pushListener.call(this, v)
-        }
+        };
         // this.strokes= [];
         console.log(this.strokes)
         this.strokes.pushListener = function (v) {
             console.log('数组发生变化');
-            console.log(sketchpad.strokes)
+            console.log(sketchpad.strokes);
             sketchpad.redraw(sketchpad.strokes); // 监听数组变化绘图
         }
     };
@@ -236,9 +195,6 @@
         this._stroke(start, end, color, size, 'source-over');
     };
 
-    Sketchpad.prototype._erase = function (start, end, color, size) {
-        this._stroke(start, end, color, size, 'destination-out');
-    };
 
     Sketchpad.prototype._stroke = function (start, end, color, size, compositeOperation) {
         this.context.save();
@@ -385,66 +341,22 @@
         }
     };
 
-    Sketchpad.prototype.toObject = function () {
-        return {
-            width: this.canvas.width,
-            height: this.canvas.height,
-            strokes: this.strokes,
-            undoHistory: this.undoHistory,
-        };
-    };
+    // Sketchpad.prototype.toObject = function () {
+    //     return {
+    //         width: this.canvas.width,
+    //         height: this.canvas.height,
+    //         strokes: this.strokes,
+    //         undoHistory: this.undoHistory,
+    //     };
+    // };
 
-    Sketchpad.prototype.toJSON = function () {
-        return JSON.stringify(this.toObject());
-    };
-
-    Sketchpad.prototype.animate = function (ms, loop, loopDelay) {
-        this.clear();
-        var delay = ms;
-        var callback = null;
-        for (var i = 0; i < this.strokes.length; i++) {
-            var stroke = this.strokes[i];
-            for (var j = 0; j < stroke.lines.length; j++) {
-                var line = stroke.lines[j];
-                callback = this._draw.bind(this, line.start, line.end,
-                    stroke.color, stroke.size);
-                this.animateIds.push(setTimeout(callback, delay));
-                delay += ms;
-            }
-        }
-        if (loop) {
-            loopDelay = loopDelay || 0;
-            callback = this.animate.bind(this, ms, loop, loopDelay);
-            this.animateIds.push(setTimeout(callback, delay + loopDelay));
-        }
-    };
-
-    Sketchpad.prototype.cancelAnimation = function () {
-        for (var i = 0; i < this.animateIds.length; i++) {
-            clearTimeout(this.animateIds[i]);
-        }
-    };
-
-    Sketchpad.prototype.clear = function () {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    };
-
-    Sketchpad.prototype.undo = function () {
-        this.clear();
-        var stroke = this.strokes.pop();
-        if (stroke) {
-            this.undoHistory.push(stroke);
-            this.redraw(this.strokes);
-        }
-    };
-
-    Sketchpad.prototype.redo = function () {
-        var stroke = this.undoHistory.pop();
-        if (stroke) {
-            this.strokes.push(stroke);
-            this.drawStroke(stroke);
-        }
-    };
+    // Sketchpad.prototype.toJSON = function () {
+    //     return JSON.stringify(this.toObject());
+    // };
+    //
+    // Sketchpad.prototype.clear = function () {
+    //     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // };
 </script>
 
 </body>

@@ -55,7 +55,6 @@ def train(mnist):
 
     saver = tf.train.Saver()
     with tf.Session() as sess:
-        tf.global_variables_initializer().run()
         path = os.getcwd() + "/model"
         step = 0
         if os.path.exists(path):
@@ -63,6 +62,8 @@ def train(mnist):
             saver.restore(sess, model_file)
             step = sess.run(global_step)
             print("successful restore at {0}!".format(step))
+        else:
+            tf.global_variables_initializer().run()
 
         for i in range(step, TRAIN_STEP):
             # 由于神经网络的输入大小为[BATCH_SIZE,IMAGE_SIZE,IMAGE_SIZE,CHANNEL]，因此需要reshape输入。

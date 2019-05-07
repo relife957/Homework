@@ -37,7 +37,6 @@
     var oGC = oC.getContext('2d');
 function DrawPic() {
 
-
 	oC.onmousedown = function(ev){
 
 		var ev = ev || window.event;
@@ -52,11 +51,8 @@ function DrawPic() {
 			document.onmouseup = null;
 		};
 	};
-
 }
 
-    // var img = new Image();
-    // var getPathval = null ;
 $(document).ready(function () {
     $('#subServer').click(function () {
         var Pic = document.getElementById("myCanvas").toDataURL("image/png");

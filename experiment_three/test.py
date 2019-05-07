@@ -17,6 +17,8 @@ import matplotlib.pylab as plt
 import numpy as np
 from prettyprinter import pprint
 
+id = 1
+
 
 def fill(filename):
     img = Image.open(filename)
@@ -58,7 +60,7 @@ def picTo01(filename):
                 raw_data[x, y] = (255, 255, 255, 255)
 
     # 设置为32*32的大小
-    img = img.resize((32, 32), Image.LANCZOS)
+    img = img.resize((28, 28), Image.LANCZOS)
 
     # 进行保存，方便查看
     img.save('test.png')
@@ -68,7 +70,7 @@ def picTo01(filename):
 
     # 按照公式将其转为01, 公式： 0.299 * R + 0.587 * G + 0.114 * B
 
-    gray_array = np.zeros((32, 32))
+    gray_array = np.zeros((28, 28))
 
     # 行数
     for x in range(array.shape[0]):
@@ -84,20 +86,42 @@ def picTo01(filename):
                 gray_array[x][y] = 1
 
     # 得到对应名称的txt文件
+    global id
     name01 = filename.split('.')[0]
-    name01 = name01 + '.txt'
+    if name01 == '':
+        name01 = "{0}".format(id)
+        id += 1
+    name01 = name01 + '11.txt'
 
     # 保存到文件中
     np.savetxt(name01, gray_array, fmt='%d', delimiter='')
 
+
+def shrink(filename):
+    img = Image.open(filename).convert('RGBA')
+    img = img.resize((28, 28), Image.LANCZOS)
+    img.save('test.png')
+
+
 from pylab import *
-def toARGB(filename):
-    img = Image.open(filename)
-    res = array(img)
-    pprint(res)
+
+
+def gray(filename):
+    im = array(Image.open(filename).convert('L'), 'f')
+    print(im.shape,im.dtype)
+
+#
+# def toARGB(filename):
+#     img = Image.open(filename)
+#     res = array(img)
+#     pprint(res)
+
 
 if __name__ == '__main__':
-    filename = './static/result/3.png'
-    toARGB(filename)
-    # fill(filename)
-    # picTo01(filename)
+    filename = './static/result/1.png'
+    # toARGB(filename)
+    fill(filename)
+    # shrink(filename)
+    # fill('./test.png')
+    picTo01(filename)
+    # gray('./test.png')
