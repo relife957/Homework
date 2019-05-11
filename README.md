@@ -1,7 +1,15 @@
 # Homework
-homework
 
-### introduce
-project engineering pratice -- two web project -- tornado
-- draw a lottery system
-- chat room
+Coursework
+
+## introduce
+
+- experment_one : 
+Web of draw award
+
+- experiment_two : 
+web of chat room
+
+- experiment_three :
+Lenet-5 Mnist and its web show
+
