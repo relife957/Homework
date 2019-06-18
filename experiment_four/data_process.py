@@ -89,10 +89,10 @@ def create_image_lists(sess, testing_percentage, validation_percentage,bottlenec
                        validation_images, validation_labels,
                        testing_images, testing_labels, label_names])
 
-def create_inception_graph():
+def create_inception_graph(file_path):
     #加载已训练好的inception-v3模型
     with tf.Graph().as_default() as graph:
-        with gfile.FastGFile(MODEL_FILE, 'rb') as f:
+        with gfile.FastGFile(file_path, 'rb') as f:
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(f.read())
             bottleneck_tensor, jpeg_data_tensor = tf.import_graph_def(graph_def, name='', return_elements=[BOTTLENECK_TENSOR_NAME, JPEG_DATA_TENSOR_NAME])
@@ -100,7 +100,7 @@ def create_inception_graph():
 
 
 def main():
-    graph, bottleneck_tensor, jpeg_data_tensor =create_inception_graph()
+    graph, bottleneck_tensor, jpeg_data_tensor =create_inception_graph(MODEL_FILE)
     with tf.Session(graph=graph) as sess:
         init = tf.global_variables_initializer()
         sess.run(init)

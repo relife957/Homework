@@ -4,17 +4,24 @@ import random
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.framework import graph_util
+from experiment_four.data_process import create_inception_graph
 
 # 保存训练数据通过瓶颈层后提取的特征向量
 TRAIN_FILE = './train_dir/model.pb'
 # 处理好之后的数据文件。
 INPUT_DATA = 'flower_processed_data.npy'
+#model_flie
+MODEL_FILE = './inceptionV3/tensorflow_inception_graph.pb'
+# inception-v3 模型中代表瓶颈层结果的张量名称
+BOTTLENECK_TENSOR_NAME = 'pool_3/_reshape:0'
+# 图像输入张量所对应的名称
+JPEG_DATA_TENSOR_NAME = 'DecodeJpeg/contents:0'
 # inception-v3 模型瓶颈层的节点个数
 BOTTLENECK_TENSOR_SIZE = 2048
 # 定义神经网路的设置
 LEARNING_RATE_BASE = 0.01
 LEARNING_RATE_DECAY = 0.99
-STEPS = 2000
+STEPS = 3000
 BATCH = 100
 N_CLASSES = 5
 
@@ -90,7 +97,45 @@ def train():
         constant_graph = graph_util.convert_variables_to_constants(sess, sess.graph_def, ["output/prob"])
         with tf.gfile.FastGFile(TRAIN_FILE, mode='wb') as f:
             f.write(constant_graph.SerializeToString())
+
+
+# 加载迁移学习后的模型
+def create_trained_graph():
+    with tf.Graph().as_default() as graph:
+        with tf.gfile.GFile(os.path.join(os.path.dirname(__file__), TRAIN_FILE), 'rb') as f:
+            graph_def = tf.GraphDef()
+            graph_def.ParseFromString(f.read())
+            BottleneckInputPlaceholder_tensor, final_tensor = tf.import_graph_def(graph_def, name='', return_elements=[
+                'BottleneckInputPlaceholder:0', 'output/prob:0'])
+    return graph, BottleneckInputPlaceholder_tensor, final_tensor
+
+
+# 花卉识别函数
+def flower_recog(filepath):
+    graph1, bottleneck_tensor, jpeg_data_tensor = create_inception_graph(MODEL_FILE)
+    with tf.Session(graph=graph1) as sess:
+        sess.run(tf.global_variables_initializer())
+        image_raw_data = tf.gfile.GFile(filepath, 'rb').read()
+        image_value = sess.run(bottleneck_tensor, {jpeg_data_tensor: image_raw_data})
+        image_value = np.squeeze(image_value)
+
+    graph2, BottleneckInputPlaceholder_tensor, final_tensor = create_trained_graph()
+    with tf.Session(graph=graph2) as sess:
+        sess.run(tf.global_variables_initializer())
+        final = sess.run(final_tensor, {BottleneckInputPlaceholder_tensor: [image_value]})
+        print(final)
+        result = np.argmax(final)
+
+    # 获取标签值
+    processed_images = np.load(os.path.join(os.path.dirname(__file__), INPUT_DATA))
+    labels = processed_images[6]
+    return labels[result]
+
+
+
 if __name__ == '__main__':
     # os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-    train()
+    ima_path = './flower_photos/carnation/1.jpg'
+    print()
+    print(type(flower_recog(ima_path)))

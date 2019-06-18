@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <style>
+        #img, #cv {
+            border-style: ridge;
+            border-width: medium;
+            border-color: #2451bc;
+        }
+    </style>
+</head>
+
+<body>
+<img id="img" width="400px" height="300px"/>
+
+<canvas id="temp" width="400px" height="300px"></canvas>
+<p>canvas:</p>
+<canvas id="cv" width="299px" height="299px"></canvas>
+<br/><br/>
+<input id="video" type="file" accept="image/*" capture="camera">
+
+<button id="snap">上传</button>
+<br/>
+<p id="show">待预测:  </p>
+
+<script>
+    //获得Canvas对象
+    var input = document.querySelector('input[type=file]');
+    input.onchange = function () {
+        var file = input.files[0];
+        displayAsImage(file);
+    };
+
+    function displayAsImage(file) {
+        var imgURL = URL.createObjectURL(file),
+            img = document.getElementById('img');
+        img.onload = function () {
+            URL.revokeObjectURL(imgURL);
+        };
+
+        img.src = imgURL;
+    }
+
+    //1080*1440
+    $(document).ready(function () {
+        $("#snap").click(function () {
+            const img = document.getElementById('img');
+            const temp = document.getElementById('temp');
+            temp.getContext('2d').drawImage(img, 0, 0, 400, 300);
+            var canvas = document.getElementById("cv");
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(temp,50,0,350,300,0,0,299,299);
+            temp.getContext("2d").clearRect(0,0,400,300);
+
+            //上传
+            var dataURL = canvas.toDataURL('image/jpeg');
+            var d = {img: dataURL};
+            $.post('http://10.40.46.22:8888/upload', d, function (data,status) {
+                const show_value = '预测结果为: '.concat(data);
+                console.log(status);
+                $('#show').empty().append(show_value)
+            })
+        });
+    })
+
+</script>
+</body>
+</html>
